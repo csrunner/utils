@@ -9,6 +9,13 @@ import cv2
 cwd = os.getcwd()
 classes = ['cctv1','cctv2']
 def encode_TFRecord(cwd,filename,classes):
+    '''
+    encode images and their labels into the TF Record
+    :param cwd:
+    :param filename:
+    :param classes:
+    :return:
+    '''
     writer = tf.python_io.TFRecordWriter(filename)
     for index,name in enumerate(classes):
         imgs_path = os.path.join(cwd,name)
@@ -28,7 +35,26 @@ def encode_TFRecord(cwd,filename,classes):
     writer.close()
 
 
-def decode_TFRecord(filename):
+def decode_TFRecord_single(filename):
+    '''
+    decode the TF Record one by one
+    :param filename:
+    :return:
+    '''
+    for serialized_example in tf.python_io.tf_record_iterator(filename):
+        example = tf.train.Example()
+        example.ParseFromString(serialized_example)
+        image = example.features.feature['image'].bytes_list.value
+        label = example.features.feature['label'].int64_list.value
+        print(image,label)
+
+
+def decode_TFRecord_queue(filename):
+    '''
+    decode the TF Record in a queue
+    :param filename:
+    :return:
+    '''
     filename_queue = tf.train.string_input_producer([filename])
     reader = tf.TFRecordReader()
     _,serialized_record = reader.read(filename_queue)
@@ -44,8 +70,9 @@ def decode_TFRecord(filename):
 
     return img,label
 
+
 def main():
-    img,label = decode_TFRecord('train.tfrecords')
+    img,label = decode_TFRecord_queue('train.tfrecords')
     img_batch,label_batch = tf.train.shuffle_batch([img,label],
                                                    batch_size=30,capacity=2000,
                                                    min_after_dequeue=1000)
@@ -56,3 +83,6 @@ def main():
         for i in range(3):
             val,l = sess.run([img_batch,label_batch])
             print(val.shape,l)
+
+if __name__ == '__main__':
+    main()
