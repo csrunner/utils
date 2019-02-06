@@ -1,0 +1,11 @@
+#!/bin/bash
+cat >/etc/yum.repos.d/docker.repo<<EOF
+[docker-ce-stable]
+name=Docker CE Stable - $basearch
+baseurl=https://mirrors.aliyun.com/docker-ce/linux/centos/7/x86_64/stable/
+enabled=1
+gpgcheck=0
+gpgkey=https://download.docker.com/linux/centos/gpg
+EOF
+yum makecache
+yum -y install docker-ce
