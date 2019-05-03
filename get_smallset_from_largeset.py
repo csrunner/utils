@@ -5,6 +5,13 @@ import glob
 import shutil
 
 def create_smallset(root_in,root_out,rate):
+    '''
+    create a small dataset from a large one
+    :param root_in:
+    :param root_out:
+    :param rate:
+    :return:
+    '''
     counter = 0
     dirs = os.listdir(root_in)
     for dir in dirs:
@@ -21,9 +28,13 @@ def create_smallset(root_in,root_out,rate):
         #     print(os.path.basename(filelist))
         for filelist in filelists:
             if os.path.isfile(filelist):
-                filename = os.path.basename(filelist)
-                while counter < int(len(filelists)*rate):
-                    shutil.copy(filelist,os.path.join(os.path.join(root_out,dir),filename))
+                continue
+            if counter < int(len(filelists)*rate):
+                shutil.copy(filelist,os.path.join(os.path.join(root_out,dir),filelist))
+                counter += 1
+        counter = 0
+
+
 
 
 
